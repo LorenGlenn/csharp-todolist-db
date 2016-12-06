@@ -2,7 +2,7 @@
 <ol>
 @foreach (var task in @Model.GetTasks())
 {
-  <li>@task.GetDescription()</li>
+  <li>@task.GetDescription(), Due by: @task.GetDueDate()</li>
 }
 </ol>
 <p><a href='/categories/@Model.GetId()/tasks/new'>Add a new task</a></p>

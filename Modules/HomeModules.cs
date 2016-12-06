@@ -42,9 +42,10 @@ namespace ToDoList
           Post["/tasks"] = _ => {
             Dictionary<string, object> model = new Dictionary<string, object>();
             Category selectedCategory = Category.Find(Request.Form["category-id"]);
+            int selectedCategoryId = selectedCategory.GetId();
             List<Task> categoryTasks = selectedCategory.GetTasks();
             string taskDescription = Request.Form["task-description"];
-            Task newTask = new Task(taskDescription);
+            Task newTask = new Task(taskDescription, selectedCategoryId);
             categoryTasks.Add(newTask);
             model.Add("tasks", categoryTasks);
             model.Add("category", selectedCategory);

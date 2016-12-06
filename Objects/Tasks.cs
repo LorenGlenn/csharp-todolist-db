@@ -8,11 +8,13 @@ namespace ToDoList.Objects
   {
     private string _description;
     private int _id;
+    private int _category_id;
 
-    public Task(string description, int Id = 0)
+    public Task(string description, int category_id, int Id = 0)
     {
       _description = description;
       _id = Id;
+      _category_id = category_id;
     }
 
     public override bool Equals(System.Object otherTask)
@@ -25,8 +27,9 @@ namespace ToDoList.Objects
       {
         Task newTask = (Task) otherTask;
         bool idEquality = (this.GetId() == newTask.GetId());
+        bool categoryEquality = (this.GetCategoryId() == newTask.GetCategoryId());
         bool descriptionEquality = (this.GetDescription() == newTask.GetDescription());
-        return (idEquality && descriptionEquality);
+        return (idEquality && descriptionEquality && categoryEquality);
       }
     }
     public override int GetHashCode()
@@ -42,6 +45,15 @@ namespace ToDoList.Objects
     public void SetDescription(string newDescription)
     {
       _description = newDescription;
+    }
+    public int GetCategoryId()
+    {
+      return _category_id;
+    }
+
+    public void SetCategoryId(int newId)
+    {
+      _category_id = newId;
     }
     public int GetId()
     {
@@ -60,8 +72,9 @@ namespace ToDoList.Objects
       while (rdr.Read())
       {
         int taskId = rdr.GetInt32(0);
-        string taskDescription = rdr.GetString(1);
-        Task newTask = new Task(taskDescription, taskId);
+        string taskDescription = rdr.GetString(2);
+        int taskCategoryId = rdr.GetInt32(1);
+        Task newTask = new Task(taskDescription, taskCategoryId, taskId);
         allTasks.Add(newTask);
       }
 
@@ -82,12 +95,18 @@ namespace ToDoList.Objects
       SqlConnection conn = DB.Connection();
       conn.Open();
 
-      SqlCommand cmd = new SqlCommand("INSERT INTO tasks (description) OUTPUT INSERTED.id VALUES (@TaskDescription);", conn);
+      SqlCommand cmd = new SqlCommand("INSERT INTO tasks (description, category_id) OUTPUT INSERTED.id VALUES (@TaskDescription, @CategoryId);", conn);
 
       SqlParameter descriptionParameter = new SqlParameter();
       descriptionParameter.ParameterName = "@TaskDescription";
       descriptionParameter.Value = this.GetDescription();
       cmd.Parameters.Add(descriptionParameter);
+
+      SqlParameter categoryIdParameter = new SqlParameter();
+      categoryIdParameter.ParameterName = "@CategoryId";
+      categoryIdParameter.Value = this.GetCategoryId();
+      cmd.Parameters.Add(categoryIdParameter);
+
       SqlDataReader rdr = cmd.ExecuteReader();
 
       while(rdr.Read())
@@ -117,13 +136,15 @@ namespace ToDoList.Objects
       SqlDataReader rdr = cmd.ExecuteReader();
 
       int foundTaskId = 0;
+      int foundCategoryId = 0;
       string foundTaskDescription = null;
       while(rdr.Read())
       {
         foundTaskId = rdr.GetInt32(0);
-        foundTaskDescription = rdr.GetString(1);
+        foundCategoryId = rdr.GetInt32(1);
+        foundTaskDescription = rdr.GetString(2);
       }
-      Task foundTask = new Task(foundTaskDescription, foundTaskId);
+      Task foundTask = new Task(foundTaskDescription, foundCategoryId, foundTaskId);
 
       if (rdr != null)
       {

@@ -20,16 +20,14 @@ namespace ToDoList
           };
           Post["/categories"] = _ => {
             var newCategory = new Category(Request.Form["category-name"]);
+            newCategory.Save();
             var allCategories = Category.GetAll();
             return View["categories.cshtml", allCategories];
           };
           Get["/categories/{id}"] = parameters => {
-            Dictionary<string, object> model = new Dictionary<string, object>();
             var selectedCategory = Category.Find(parameters.id);
-            var categoryTasks = selectedCategory.GetTasks();
-            model.Add("category", selectedCategory);
-            model.Add("tasks", categoryTasks);
-            return View["category.cshtml", model];
+            List<Task> categoryTasks = selectedCategory.GetTasks();
+            return View["category.cshtml", selectedCategory];
           };
           Get["/categories/{id}/tasks/new"] = parameters => {
             Dictionary<string, object> model = new Dictionary<string, object>();
@@ -40,16 +38,13 @@ namespace ToDoList
             return View["category_tasks_form.cshtml", model];
           };
           Post["/tasks"] = _ => {
-            Dictionary<string, object> model = new Dictionary<string, object>();
             Category selectedCategory = Category.Find(Request.Form["category-id"]);
             int selectedCategoryId = selectedCategory.GetId();
-            List<Task> categoryTasks = selectedCategory.GetTasks();
             string taskDescription = Request.Form["task-description"];
             Task newTask = new Task(taskDescription, selectedCategoryId);
-            categoryTasks.Add(newTask);
-            model.Add("tasks", categoryTasks);
-            model.Add("category", selectedCategory);
-            return View["category.cshtml", model];
+            newTask.Save();
+            List<Task> categoryTasks = selectedCategory.GetTasks();
+            return View["category.cshtml", selectedCategory];
           };
         }
       }

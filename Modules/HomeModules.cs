@@ -1,6 +1,8 @@
 using Nancy;
 using System.Collections.Generic;
 using ToDoList.Objects;
+using System;
+using System.Globalization;
 
 namespace ToDoList
 {
@@ -41,10 +43,16 @@ namespace ToDoList
             Category selectedCategory = Category.Find(Request.Form["category-id"]);
             int selectedCategoryId = selectedCategory.GetId();
             string taskDescription = Request.Form["task-description"];
-            Task newTask = new Task(taskDescription, selectedCategoryId);
+            DateTime taskDue = Request.Form["task-due"];
+            Task newTask = new Task(taskDescription, selectedCategoryId, taskDue);
             newTask.Save();
             List<Task> categoryTasks = selectedCategory.GetTasks();
             return View["category.cshtml", selectedCategory];
+          };
+          Post["/"] = _ => {
+            Task.DeleteAll();
+            Category.DeleteAll();
+            return View["index.cshtml"];
           };
         }
       }
